@@ -1,6 +1,6 @@
 import os
 
-output_dir = "Scripts/src/cpu"
+output_dir = "Scripts/src/cpu/auto_gen_included_files"
 filename = "isr_gen.c"
 filepath = os.path.join(output_dir,filename)
 

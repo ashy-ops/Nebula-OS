@@ -33,7 +33,9 @@ void pic_remap(void) {
     outb(PIC1_DATA, 0x00);
     outb(PIC2_DATA, 0x00);
 
-    //outb(0x21, 0xFF);
-    //outb(0xA1, 0xFF);
+    //Masking all hardware interrupts
+    //outb(PIC1_DATA, 0xFE);
+    //outb(PIC2_DATA, 0xFF);
+
 
 }

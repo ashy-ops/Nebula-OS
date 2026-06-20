@@ -9,11 +9,13 @@ OBJCOPY := objcopy
 #This way I can directly import header files by just typing their name instead of writing the full path
 CFLAGS  := -ffreestanding -O3 -Wall -Wextra -fno-stack-protector -g -IScripts/headers
 LDFLAGS := -m elf_i386 -T linker.ld
+ASMFLAGS = -f elf32 $(foreach dir, $(INC_DIRS), -i $(dir)/) #use = instead := because (search google)
 
 # Directories
 SRC_DIR   := Scripts/src
 BUILD_DIR := build
 BIN_DIR   := bin
+INC_DIRS := $(shell find $(SRC_DIR) -name "*.inc" -exec dirname {} \; | sort -u)
 
 # Targets
 BOOT_BIN   := $(BIN_DIR)/boot.bin
@@ -26,7 +28,6 @@ C_SOURCES   := $(shell find $(SRC_DIR) -name '*.c')
 ASM_SOURCES := $(shell find $(SRC_DIR) -name '*.asm' ! -name 'boot.asm')
 OBJECTS     := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(C_SOURCES)) \
                $(patsubst $(SRC_DIR)/%.asm, $(BUILD_DIR)/%.asm.o, $(ASM_SOURCES))
-
 
 # Force rebuild if headers change
 HEADERS := $(wildcard Scripts/headers/*.h)
@@ -62,9 +63,13 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS)
 # Pattern: ASM files
 $(BUILD_DIR)/%.asm.o: $(SRC_DIR)/%.asm
 	@mkdir -p $(dir $@)
-	$(ASM) -f elf32 $< -o $@
+	$(ASM) $(ASMFLAGS) $< -o $@
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
 
 run: $(OS_IMAGE)
 	qemu-system-i386 -drive format=raw,file=$(OS_IMAGE)
+
+debug:
+	   @echo "INC_DIRS is: $(INC_DIRS)"
+	   @echo "ASMFLAGS is: $(ASMFLAGS)"

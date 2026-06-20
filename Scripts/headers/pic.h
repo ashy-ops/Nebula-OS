@@ -15,5 +15,7 @@
 #define ICW4_8086       0x01    // 8086/88 mode instruction bit
 
 void pic_remap(void);
+void mask_line(void);
+void unmask_line(void);
 
 #endif
