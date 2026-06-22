@@ -2,10 +2,11 @@
 mov [BOOT_DISK],dl    ;Storing the boot-drive
 ;Store it at the very top as any bios interrupt may overwrite it
 
-CODE_SEG equ 0x08       ;Used for execution of code
-DATA_SEG equ 0x10       ;Used whenever we read or write memory
-
-KERNEL_STUB equ 0x7e00  ;The address where kernel stub(entry point is loaded)
+CODE_SEG equ 0x08           ;Used for execution of code
+DATA_SEG equ 0x10           ;Used whenever we read or write memory
+MEM_MAP_BUFFER equ 0x90001   ;Used to store the Memory Map
+KERNEL_STUB equ 0x7e00      ;The address where kernel stub(entry point is loaded)
+MULTI_BOOT_ENTRY_COUNT equ 0x90000
 
 [bits 16]
 
@@ -19,6 +20,42 @@ start_bootloader:
   mov sp,0x7c00
   sti
 
+load_e820:
+  mov ax,0x9000
+  mov es,ax
+  mov di,0x0001
+  
+  xor ebx,ebx
+
+.next_entry:
+  mov eax,0xe820
+  mov edx,0x534d4150
+  mov ecx,24
+  int 0x15
+
+  jc .error
+  mov al, 'A'
+  mov ah, 0x0E
+  int 0x10
+
+  add [ENTRY_COUNT],1
+  add di,24
+
+  cmp ebx,0
+  jz .finish
+
+  jmp .next_entry
+
+.error:
+  mov al,'E'
+  mov ah, 0x0E
+  int 0x10
+  ret
+.finish:
+  mov si,msg_check2
+  call printRM
+
+
   ;16-bit success message
   mov si,msg16_bit  ;Load string into si(Source Index Register)
   call printRM
@@ -28,9 +65,11 @@ start_bootloader:
   mov ah,0x00   ;Read RTC
   int 0x1A      ;Interrupt
   ;Stores the value in dx register
-
+  
   mov bx,dx
   add bx, 18*3  ;3seconds approx
+
+
 
 wait_loop:
   mov ah,0x00 ;Read RTC
@@ -68,6 +107,7 @@ load_sectors:
   int 0x10
 
 
+
   ;Switch to Protected Mode
   cli
   lgdt [gdt_descriptor]
@@ -94,6 +134,8 @@ init_pm:
   mov ebp,0x90000
   mov esp,ebp
 
+  mov al,[ENTRY_COUNT]
+  mov [MULTI_BOOT_ENTRY_COUNT],al
   jmp CODE_SEG:KERNEL_STUB ;Jump to the kernel entry stub
 
 ;---------------------GDT---------------------------------------
@@ -108,23 +150,33 @@ gdt_descriptor:
   dd gdt
 ;---------------------FUNCTIONS-----------------------------------
 
+
 printRM:
   lodsb    ;Load byte at DS:[SI] into al,then increment SI
   cmp al,0  ;Check if NULL terminator
-  je done  ;If al=0 jump out of loop
+  je .done  ;If al=0 jump out of loop
   
   mov ah,0x0e ;BIOS teltype 
   int 0x10    ;BIOS interrupt
 
   jmp printRM
-done:
+.done:
   ret
+
 
 ;---------------------DECLARATIONS-----------------------------------
 msg16_bit:
-  db "MASH-OS 1.1.0",0
+  db "MASH-OS 1.1.0",0x0A,0x0D,0
+msg_check1:
+  db "Timer continued",0
+
+msg_check2:
+  db "Memory Map Loaded",0x0A,0x0D,0
 
 BOOT_DISK:
+  db 0
+
+ENTRY_COUNT:
   db 0
 ;----------------------------------------------------------------------
 

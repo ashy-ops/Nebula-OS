@@ -43,6 +43,7 @@ enum vga_color {
 void putc(const char c);
 void puts(const char* s);
 void puti(int i);
+void puth(uint64_t n);
 
 void scroll();
 void terminal_initialize(void);

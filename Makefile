@@ -71,5 +71,4 @@ run: $(OS_IMAGE)
 	qemu-system-i386 -drive format=raw,file=$(OS_IMAGE)
 
 debug:
-	   @echo "INC_DIRS is: $(INC_DIRS)"
-	   @echo "ASMFLAGS is: $(ASMFLAGS)"
+	qemu-system-i386 -drive format=raw,file=$(OS_IMAGE) -s -S

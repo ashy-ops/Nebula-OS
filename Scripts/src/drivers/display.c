@@ -38,6 +38,20 @@ void putc(const char c)
   cur_column++;
   
 }
+void puth(uint64_t n) {
+    char hex_digits[] = "0123456789ABCDEF";
+    putc('0');
+    putc('x');
+    
+    // Process 16 hex digits (for 64-bit address)
+    for (int i = 15; i >= 0; i--) {
+        // Shift right by i * 4 bits to get the current nibble, 
+        // then mask with 0xF to get the value 0-15
+        uint8_t nibble = (n >> (i * 4)) & 0xF;
+        putc(hex_digits[nibble]);
+    }
+}
+
 
 void puts(const char* s)
 {
@@ -60,6 +74,7 @@ void puti(int i)
 
 void terminal_initialize(void)
 {
+
   for(size_t y = 0; y<VGA_HEIGHT; y++)
   {
     for(size_t x = 0; x<VGA_WIDTH; x++)
@@ -68,6 +83,7 @@ void terminal_initialize(void)
       terminal_buffer[indx] = vga_entry(' ',vga_entry_color(terminal_color,terminal_color));
     }
   }
+  
   write_to_terminal("Hello from the OS!",WHITE);
   
 }
@@ -115,6 +131,10 @@ void write_to_terminal(const char* str,enum vga_color color, ...)
                     puti(i);
                     state = NORMAL;
                     break;
+          case 'h': uint64_t n = va_arg(args,uint64_t);
+                               puth(n);
+                               state=NORMAL;
+                               break;
         }
 
         break;
