@@ -50,16 +50,12 @@ enum vga_color {
 };
 
 
-// void puti(int32_t i);
-// void puts(int16_t i);
-// void putS(uint16_t i);
+
 
 
 void putc(const char c);
 void puts(const char* s);
 void print_num(va_list* args,uint8_t len,bool sign,uint8_t radix);
-// void puti(int i);
-// void puth(uint64_t n);
 
 void scroll();
 void terminal_initialize(void);

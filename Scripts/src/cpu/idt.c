@@ -3,38 +3,38 @@
 #include "isr.h"
 
 
-static IDT_ENTRY IDT_TABLE[IDT_MAX_DESCRIPTORS];
+static idt_entry_t idt_table[IDT_MAX_DESCRIPTORS];
 
-static IDTR IDTR_P = 
+static idtr_t idtr_p =
 {
-  sizeof(IDT_TABLE)-1,
-  IDT_TABLE //due to pointer decay its equivalent to &IDT_TABLE[0]
+  sizeof(idt_table)-1,
+  idt_table //due to pointer decay its equivalent to &idt_table[0]
 };
 
-void IDT_SET_GATE(uint8_t interrupt, uint16_t BaseLow, uint8_t segment_selector, uint8_t attributes, uint16_t BaseHigh)
+void idt_set_gate(uint8_t interrupt, uint16_t base_low, uint8_t segment_selector, uint8_t attributes, uint16_t base_high)
 {
-  IDT_TABLE[interrupt].BaseLow = BaseLow;
-  IDT_TABLE[interrupt].segment_selector = segment_selector;
-  IDT_TABLE[interrupt].attributes = attributes;
-  IDT_TABLE[interrupt].reserved = 0; //Always 0
-  IDT_TABLE[interrupt].BaseHigh = BaseHigh;
+  idt_table[interrupt].base_low = base_low;
+  idt_table[interrupt].segment_selector = segment_selector;
+  idt_table[interrupt].attributes = attributes;
+  idt_table[interrupt].reserved = 0; //Always 0
+  idt_table[interrupt].base_high = base_high;
 }
 
-void IDT_GATE_ENABLE(uint8_t interrupt)
+void idt_gate_enable(uint8_t interrupt)
 {
-  IDT_TABLE[interrupt].attributes |= 0x80;
+  idt_table[interrupt].attributes |= 0x80;
 }
-void IDT_GATE_DISABLE(uint8_t interrupt)
+void idt_gate_disable(uint8_t interrupt)
 {
-  IDT_TABLE[interrupt].attributes &= ~0x80;
+  idt_table[interrupt].attributes &= ~0x80;
 }
 
-void INITIALIZE_IDT()
+void idt_initialize(void)
 {
   for(int i=0; i< IDT_MAX_DESCRIPTORS;i++)
   {
-    IDT_SET_GATE(i,0,0,0,0);
+    idt_set_gate(i,0,0,0,0);
   }
-  ISR_Initialize();
-  LOAD_IDT(&IDTR_P);
+  isr_initialize();
+  load_idt(&idtr_p);
 }

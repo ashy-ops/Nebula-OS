@@ -216,10 +216,10 @@ const char hex_chars[] = "0123456789ABCDEF";
 void print_num(va_list* args,uint8_t len,bool sign, uint8_t radix)
 {
   char buffer[32];
-  uint64_t num;
+  uint64_t num = 0;
   int num_sign = 1;
   int pos = 0;
-  
+
   switch(len)
   {
     case LEN_DEF:
@@ -245,6 +245,10 @@ void print_num(va_list* args,uint8_t len,bool sign, uint8_t radix)
         num_sign = -1;
       }
       num = (uint64_t)n;
+      break;
+    default:
+      num = 0;
+      break;
   }
 
   do

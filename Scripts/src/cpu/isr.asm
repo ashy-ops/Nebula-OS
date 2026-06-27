@@ -1,6 +1,6 @@
 [bits 32]
 
-extern ISR_HANDLER
+extern isr_handler
 
 %macro ISR_ERROR 1
 global ISR%+%1:
@@ -36,7 +36,7 @@ isr_common:
   mov gs,ax
 
   push esp                ;Pushes the stack pointer as an argument to the C function
-  call ISR_HANDLER
+  call isr_handler
   
   add esp,4               ;removes the esp argument
 

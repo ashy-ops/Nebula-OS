@@ -1,8 +1,8 @@
 [BITS 32]
 
-global LOAD_IDT
+global load_idt
 
-LOAD_IDT:
+load_idt:
 
   mov eax,[esp + 4]
   lidt [eax]

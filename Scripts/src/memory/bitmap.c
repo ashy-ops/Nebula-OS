@@ -4,31 +4,31 @@
 //few things to note, when you declare a value as a pointer, type *x
 //then just x represents the memory address of x
 
-inline bool bitmap_bit_free(BITMAP *bmp, uint32_t bit)
+inline bool bitmap_bit_free(bitmap_t *bmp, uint32_t bit)
 {
-    uint32_t word = bit / BPW;
-    uint32_t offset = bit % BPW;
+    uint32_t word = bit / BITS_PER_WORD;
+    uint32_t offset = bit % BITS_PER_WORD;
 
-    return !((bmp->map[word] >> offset) & 1ULL); 
+    return !((bmp->map[word] >> offset) & 1ULL);
     //grabbing the desired bit and bringing it to the 0th index or you can bring 1 th the offset index and do &
 }
 
-void bitmap_set(BITMAP *bmp, uint32_t page_num)
+void bitmap_set(bitmap_t *bmp, uint32_t page_num)
 {
-    uint32_t word = page_num / BPW;
-    uint32_t offset = page_num % BPW;
+    uint32_t word = page_num / BITS_PER_WORD;
+    uint32_t offset = page_num % BITS_PER_WORD;
     bmp->map[word] |= (1ULL << offset);
 }
 
-void bitmap_unset(BITMAP *bmp, uint32_t page_num)
+void bitmap_unset(bitmap_t *bmp, uint32_t page_num)
 {
-  uint32_t word = page_num / BPW;
-  uint32_t offset = page_num % BPW;
+  uint32_t word = page_num / BITS_PER_WORD;
+  uint32_t offset = page_num % BITS_PER_WORD;
   bmp->map[word] &= ~(1ULL << offset);
 }
 
-//returns the starting page number of the contiguous memory asked for 
-bool bitmap_set_range(BITMAP *bmp, uint32_t page_cnt, uint32_t *page_strt)
+//returns the starting page number of the contiguous memory asked for
+bool bitmap_set_range(bitmap_t *bmp, uint32_t page_cnt, uint32_t *page_strt)
 {
 
     uint32_t strt = 0;
@@ -56,20 +56,20 @@ bool bitmap_set_range(BITMAP *bmp, uint32_t page_cnt, uint32_t *page_strt)
     return false; 
 }
 
-void bitmap_unset_range(BITMAP *bmp, uint32_t page_start,uint32_t page_cnt)
+void bitmap_unset_range(bitmap_t *bmp, uint32_t page_start,uint32_t page_cnt)
 {
   for(uint32_t i = 0;i<page_cnt;i++) bitmap_unset(bmp,page_start+i);
   if(page_start<bmp->free_page) bmp->free_page = page_start;
 }
 
 
-void bitmap_init(BITMAP *bmp, WORD_SIZE base_addr, WORD_SIZE free_ram_bits)
+void bitmap_init(bitmap_t *bmp, uintptr_t base_addr, uint64_t free_ram_bits)
 {
     bmp->free_page = 0;
     bmp->map = (WORD_SIZE *)base_addr;
-    WORD_SIZE ram_in_bytes = free_ram_bits/8;
-    uint32_t tot_pages = ram_in_bytes/PAGE_SIZE; 
-    bmp->word_cnt = (tot_pages+BPW-1)/BPW;
+    uint64_t ram_in_bytes = free_ram_bits/8;
+    uint32_t tot_pages = ram_in_bytes/PAGE_SIZE;
+    bmp->word_cnt = (tot_pages+BITS_PER_WORD-1)/BITS_PER_WORD;
     bmp->total_pages = tot_pages;
     uint32_t bitmap_bytes  = (tot_pages+7)/8;
     uint32_t bitmap_pages = (bitmap_bytes + PAGE_SIZE - 1) / PAGE_SIZE;

@@ -7,9 +7,9 @@ typedef struct {
     uint32_t interrupt;                                   // Pushed by macro
     uint32_t error;                                       // Pushed by macro
     uint32_t eip, cs, eflags;                             // Pushed by CPU
-} __attribute__((packed)) Registers;
+} __attribute__((packed)) registers_t;
 
-typedef void (*ISRHandler)(Registers* regs);    //function pointer with regs as argument
+typedef void (*isr_handler_t)(registers_t* regs);    //function pointer with regs as argument
 
-void ISR_Initialize();
-void _ISR_RegisterHandler(int interrupt, ISRHandler handler);
+void isr_initialize(void);
+void isr_register_handler(int interrupt, isr_handler_t handler);

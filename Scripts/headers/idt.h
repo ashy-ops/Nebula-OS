@@ -6,23 +6,23 @@
 
 typedef struct 
 {
-  uint16_t BaseLow;
+  uint16_t base_low;
   uint16_t segment_selector;
   uint8_t reserved;
   uint8_t attributes;
-  uint16_t BaseHigh;
+  uint16_t base_high;
 
-}__attribute__((packed)) IDT_ENTRY;
+}__attribute__((packed)) idt_entry_t;
 
 
 typedef struct
 {
   uint16_t size;
-  IDT_ENTRY* base;
+  idt_entry_t* base;
 
-}__attribute__((packed)) IDTR;
+}__attribute__((packed)) idtr_t;
 
-extern void __attribute__((cdecl)) LOAD_IDT (IDTR* IDTR_P);
+extern void __attribute__((cdecl)) load_idt (idtr_t* idtr_p);
 
 
 typedef enum
@@ -55,9 +55,9 @@ typedef enum
 } IDT_FLAGS;
 
 
-void IDT_SET_GATE(uint8_t interrupt, uint16_t BaseLow, uint8_t segment_selector, uint8_t attributes, uint16_t BaseHigh);
-void INITIALIZE_IDT();
+void idt_set_gate(uint8_t interrupt, uint16_t base_low, uint8_t segment_selector, uint8_t attributes, uint16_t base_high);
+void idt_initialize(void);
 
-void IDT_GATE_ENABLE(uint8_t interrupt);
-void IDT_GATE_DISABLE(uint8_t interrupt);
+void idt_gate_enable(uint8_t interrupt);
+void idt_gate_disable(uint8_t interrupt);
 

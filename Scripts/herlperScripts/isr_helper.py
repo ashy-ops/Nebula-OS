@@ -13,10 +13,10 @@ with open(filepath, "w") as f:
   for i in range(256):
     print(f"extern void __attribute((cdecl)) ISR{i}();",file=f)
 
-  print("void ISR_INITIALIZE_GATES()",file=f)
+  print("void isr_initialize_gates()",file=f)
   print("{",file=f)
 
   for i in range(256):
-    print(f"  IDT_SET_GATE({i}, (uint32_t)ISR{i} & 0xFFFF, 0x08, IDT_FLAG_DPL_0 | IDT_FLAG_INTERRUPT_GATE_32BIT , ((uint32_t)ISR{i} >> 16) & 0xFFFF);", file=f)
+    print(f"  idt_set_gate({i}, (uint32_t)ISR{i} & 0xFFFF, 0x08, IDT_FLAG_DPL_0 | IDT_FLAG_INTERRUPT_GATE_32BIT , ((uint32_t)ISR{i} >> 16) & 0xFFFF);", file=f)
   
   print("}",file=f)

@@ -1,3 +1,3 @@
 #pragma once
 
-void ISR_INITIALIZE_GATES();
+void isr_initialize_gates(void);

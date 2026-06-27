@@ -5,18 +5,18 @@
 #include "display.h"
 
 
-ISRHandler handlers[256];     //function pointer table
+isr_handler_t handlers[256];     //function pointer table
 
-void ISR_Initialize()
+void isr_initialize(void)
 {
-  ISR_INITIALIZE_GATES();
+  isr_initialize_gates();
   for(int i =0; i<256; i++)
   {
-    IDT_GATE_ENABLE(i);
+    idt_gate_enable(i);
   }
 
 }
-void __attribute((cdecl)) ISR_HANDLER(Registers* regs)
+void __attribute((cdecl)) isr_handler(registers_t* regs)
 {
   uint8_t n = regs->interrupt;
 
