@@ -61,8 +61,11 @@ bool bitmap_set_range(BITMAP *bmp, uint32_t page_cnt, uint32_t *page_strt)
 
 void bitmap_init(BITMAP *bmp, WORD_SIZE base_addr, WORD_SIZE free_ram_bits)
 {
-    bmp->map = (WORD_SIZE *)(uintptr_t)base_addr;
+    bmp->map = (WORD_SIZE *)base_addr;
     bmp->word_cnt = free_ram_bits / BPW; 
+
+    write_to_terminal("Base Address of BITMAP: %llx",WHITE,base_addr);
+    write_to_terminal("Base Address of BITMAP: %llx",WHITE,bmp->map);
 
     for (uint32_t i = 0; i < bmp->word_cnt; i++)
     {

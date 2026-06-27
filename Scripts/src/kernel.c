@@ -50,18 +50,23 @@ void kernel_main()
   }
   write_to_terminal("----------------------------------------------",WHITE);
   write_to_terminal("TOTAL USABLE MEMORY AVAILABLE IS: %llu MB",WHITE,tot_mem/(1024*1024));
+  uint64_t* pntr = (uint64_t*)100000; //casting something to a pointer treats it as a memory address which points to a specifi datatype
+  write_to_terminal("Base Address is %llx",WHITE,*pntr);
 
   BITMAP bmp1;
-  bitmap_init(&bmp1,800000,133038080);
+  bitmap_init(&bmp1,0x100000,133038080); //MUST PASS The base address as hexadecimal not decimal!
   uint32_t x;
   if(bitmap_set_range(&bmp1,1,&x))
   {
-    write_to_terminal("successfully allocated at address %llu",WHITE,x);
+    write_to_terminal("successfully allocated at address %u",WHITE,x);
   }
   else
   {
     write_to_terminal("allocation failed!",WHITE);
   }
+  uint32_t y;
+  bitmap_set_range(&bmp1,1,&y);
+  write_to_terminal("allocated at %u",WHITE,y);
 
   while(1)
   {
