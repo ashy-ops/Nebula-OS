@@ -294,7 +294,8 @@ ASMFLAGS = -f elf32
 
 ## Demo
 
-[![Watch the demo](https://img.youtube.com/vi/4ftPqv-wHsc/0.jpg)](https://www.youtube.com/watch?v=4ftPqv-wHsc)
+## [Watch the video demo!](https://www.youtube.com/watch?v=4ftPqv-wHsc)
+
 
 ### Screenshots
 
