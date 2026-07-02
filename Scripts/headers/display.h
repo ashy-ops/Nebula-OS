@@ -56,12 +56,15 @@ enum vga_color {
 };
 
 
+uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg);
+uint16_t vga_entry(unsigned char uc, uint8_t color);
+
 void putc(const char c,enum vga_color color);
 void puts(const char* s,enum vga_color color);
 void print_num(va_list* args,uint8_t len,bool sign,uint8_t radix,enum vga_color color);
 
-void move_cursor_left();
-void move_cursor_right();
+void UPDATE_TERMINAL_COLOR(uint8_t new_bg_color);
+void UPDATE_TEXT_COLOR(uint8_t new_fg_color);
 
 void UPDATE_SCREEN();
 void SCROLL();

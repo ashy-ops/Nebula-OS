@@ -32,15 +32,35 @@ typedef struct
   uint32_t pages_allocated;
 } page_allocation_t;
 
+
+void INIT_MEMORY()
+{
+  return ;
+}
+
 void kernel_main()
 {
-
-  idt_initialize(); 
-  pic_remap();  
-  INIT_HANDLERS();
   CLEAR_SCREEN();
 
+  WRITE("==============================WELCOME TO NEBULA OS==============================\n\n",text_color);
+  WRITE("INITIALISING IDT $: ",text_color);
+  idt_initialize(); 
+  WRITE("IDT INITIALIZED SUCCESSFULLY!\n",text_color);
 
+  WRITE("================================================================================",text_color);
+  
+  WRITE("REMAPPING PIC $: ",text_color);
+  pic_remap();  
+  WRITE("PIC REMMAPED SUCCESSFULLY! \n",text_color);
+  
+  WRITE("================================================================================",text_color);
+  WRITE("INITIALISING INTERRUPT HANDLERS $: ",text_color);
+  INIT_HANDLERS();
+  WRITE("HANDLERS INITIALIZED SUCCESSFULLY!\n",text_color);
+
+
+  WRITE("================================================================================",text_color);
+  WRITE("INITIALIZING BITMAP ALLOCATOR $: \n",text_color);
   memory_region_t b = {0,0};
   uint8_t count = *(uint8_t*)ENTRY_COUNT;
   memory_map_entry_t* mem = (memory_map_entry_t*)MEMORMY_MAP;
@@ -59,13 +79,24 @@ void kernel_main()
       b.max_free_memory = len;
       b.max_base_addr = ba;
     }
-
     //from the output notice  the large chunnk of memory starting from the 1MB mark :)
     //write_to_terminal("Base:%llx, Length:%llu, Type:%u,ACPI:%u",WHITE,ba,len,type,acpi);
   }
-
   bitmap_t bmp;
   bitmap_init(&bmp,b.max_base_addr,b.max_free_memory);
+  WRITE("================================================================================",text_color);
+  WRITE("PRESS ESCAPE KEY TO CONTINUE TO SHELL :>",text_color);
+  while(1)
+  {
+    
+  }
+}
+
+
+
+
+
+
 /*
   page_allocation_t x;
   
@@ -86,8 +117,3 @@ void kernel_main()
   }
   else write_to_terminal("Allocation Failed!",WHITE);
 */
-  while(1)
-  {
-    
-  }
-}

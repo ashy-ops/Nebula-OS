@@ -164,7 +164,7 @@ printRM:
 
 ;---------------------DECLARATIONS-----------------------------------
 msg16_bit:
-  db "MASH-OS 1.1.0",0x0A,0x0D,0
+  db "NEBULA-OS 1.1.0",0x0A,0x0D,0
 msg_check1:
   db "Timer continued",0
 

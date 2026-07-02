@@ -1,11 +1,11 @@
 #include "display.h"
 
 
-static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) 
+uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) 
 {
 	return fg | bg << 4;
 }
-static inline uint16_t vga_entry(unsigned char uc, uint8_t color) 
+uint16_t vga_entry(unsigned char uc, uint8_t color) 
 {
 	return (uint16_t) uc | (uint16_t) color << 8;
 }
@@ -13,11 +13,34 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color)
 // Initializations:
 size_t cursor_write = 0;
 size_t cursor_free  = 0;
-uint8_t terminal_color = BLUE;
+uint8_t terminal_color = MAGENTA;
 uint8_t text_color = WHITE;
 uint16_t buffer[LIMIT];
 
 const char hex_chars[] = "0123456789ABCDEF";
+
+void UPDATE_TEXT_COLOR(uint8_t new_fg_color)
+{
+    text_color = new_fg_color;
+    uint8_t new_attr = vga_entry_color(text_color, terminal_color);
+    for (size_t i = 0; i < 2000; i++)
+    {
+        unsigned char current_char = (unsigned char)(buffer[i] & 0x00FF);
+        buffer[i] = vga_entry(current_char, new_attr);
+    }
+}
+
+void UPDATE_TERMINAL_COLOR(uint8_t new_bg_color)
+{
+    terminal_color = (uint8_t)new_bg_color;
+    uint8_t new_attr = vga_entry_color(text_color, terminal_color);
+
+    for (size_t i = 0; i < 2000; i++)
+    {
+        unsigned char current_char = (unsigned char)(buffer[i] & 0x00FF);
+        buffer[i] = vga_entry(current_char, new_attr);
+    }
+}
 
 void UPDATE_SCREEN()
 {
@@ -54,6 +77,7 @@ void SCROLL(void)
 }
 
 
+//use this directly when typing to screen!
 void putc(const char c,enum vga_color color)
 {
   if(c=='\n')

@@ -75,7 +75,7 @@ void bitmap_init(bitmap_t *bmp, uintptr_t base_addr, uint64_t free_ram_bits)
     uint32_t bitmap_pages = (bitmap_bytes + PAGE_SIZE - 1) / PAGE_SIZE;
 
     
-    WRITE("Base Address of BITMAP: %llx\n",WHITE,base_addr);
+    WRITE("Base Address of BITMAP: 0x%x\n",WHITE,base_addr);
     WRITE("Word Count of BITMAP: %u\n",WHITE,bmp->word_cnt);
     WRITE("Total Pages Available: %u\n",WHITE,bmp->total_pages);
 
