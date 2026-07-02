@@ -250,7 +250,7 @@ Nebula-OS/
 │   └── herlperScripts/    # Helper scripts
 │       ├── isr_asm_helper.py
 │       ├── isr_helper.py
-│       └── triggerINT.asm
+|
 ├── linker.ld              # Linker script
 ├── Makefile               # Build configuration
 └── README.md              # This file
