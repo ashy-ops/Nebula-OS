@@ -1,178 +1,96 @@
 #include "display.h"
 
+
 static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) 
 {
 	return fg | bg << 4;
 }
-
 static inline uint16_t vga_entry(unsigned char uc, uint8_t color) 
 {
 	return (uint16_t) uc | (uint16_t) color << 8;
 }
 
-
-uint16_t* terminal_buffer = (uint16_t*)VGA_MEMORY;
-size_t cur_row = 0;
-size_t cur_column = 0;
+// Initializations:
+size_t cursor_write = 0;
+size_t cursor_free  = 0;
 uint8_t terminal_color = BLUE;
 uint8_t text_color = WHITE;
+uint16_t buffer[LIMIT];
 
+const char hex_chars[] = "0123456789ABCDEF";
 
-
-void update_hardware_cursor()
+void UPDATE_SCREEN()
 {
-  uint16_t cursor_pos = cur_row*VGA_WIDTH + cur_column;
-  
-  // sending high byte
-  outb(VGA_CTRL_REGISTER, 0x0E);
-  outb(VGA_DATA_REGISTER, (uint8_t)((cursor_pos >> 8) & 0xFF));
-
-  // sending low byte
-  outb(VGA_CTRL_REGISTER, 0x0F);
-  outb(VGA_DATA_REGISTER, (uint8_t)(cursor_pos & 0xFF));
-}
-
-
-void move_cursor_left()
-{
-   if(cur_column==0 && cur_row!=0)
-   {
-    cur_column = VGA_WIDTH-1;
-    cur_row--;    
-   }
-   else cur_column--;
-
-   update_hardware_cursor();
-}
-
-void move_cursor_right()
-{
-  cur_column++;
-  if(cur_column==VGA_WIDTH)
+  for(size_t i; i< LIMIT; i++)
   {
-    cur_row++;
-    cur_column = 0;
+    ((uint16_t*)VGA_MEMORY)[i] = buffer[i];  
+    //equal to *(((uint16_t*)VGA_MEMORY) + i) = buffer[i];
+    //first cast the address as a pointer to a uint16_t, then add i and then dereference
+    //Note that [i] does automatic dereferncing! 
   }
-  if(cur_row==VGA_HEIGHT) scroll();
-  update_hardware_cursor(); 
 }
 
-void scroll()
+void SCROLL(void)
 {
-  int p1 = 0;
-  int p2 = VGA_WIDTH;
-  while(p2<VGA_HEIGHT*VGA_WIDTH)
-  {
-    terminal_buffer[p1++] = terminal_buffer[p2++];
-  }
-  while(p1<VGA_HEIGHT*VGA_WIDTH)
-  {
-      terminal_buffer[p1++] = vga_entry(' ',vga_entry_color(terminal_color,terminal_color));
-  }
+  int p1 = 0; //starts at first row first column
+  int p2 = VGA_WIDTH; //starts at second row first column
+  while(p2<VGA_HEIGHT*VGA_WIDTH) buffer[p1++] = buffer[p2++];
 
-  cur_row = VGA_HEIGHT-1;
-  cur_column = 0;
-}
+  uint16_t entry = vga_entry_color(text_color,terminal_color);
+  while(p1<VGA_HEIGHT*VGA_WIDTH) buffer[p1++] = vga_entry(' ',entry);
 
- void new_line()
-{
-  cur_row++;
-  if(cur_row==VGA_HEIGHT) scroll();
-  cur_column = 0;
-  update_hardware_cursor();
+  cursor_free -= VGA_WIDTH;
+  cursor_write -= VGA_WIDTH;
 }
 
 
-
-void putc(const char c)
+void putc(const char c,enum vga_color color)
 {
   if(c=='\n')
   {
-    new_line();
-    return;
+    cursor_free = (cursor_free/VGA_WIDTH +1)*VGA_WIDTH;
+    cursor_write = cursor_free;
   }
-  uint8_t entry_colors = vga_entry_color(text_color,terminal_color);
-  size_t cursor_pos = cur_row * VGA_WIDTH + cur_column;
-  terminal_buffer[cursor_pos] = vga_entry(c,entry_colors);
-  
-  cur_column++;
-  if(cur_column==VGA_WIDTH)
-  {
-    cur_row++;
-    cur_column = 0;
+  else
+  { uint8_t entry = vga_entry_color(color,terminal_color);
+    buffer[cursor_write] = vga_entry(c,entry);
+    cursor_free++;
+    cursor_write++;
   }
-  if(cur_row==VGA_HEIGHT) scroll();
-
-  update_hardware_cursor();
-  
+  if(cursor_free >= LIMIT) SCROLL();
 }
 
 
-void puts(const char* s)
+void puts(const char*s,enum vga_color color)
 {
   while(*s)
   {
-    putc(*s);
+    putc(*s, color);
     s++;
   }
 }
 
-
-void terminal_initialize(void)
+void CLEAR_SCREEN(void)
 {
-  cur_row = 0;
-  cur_column = 0;
+    cursor_write = 0;
+    cursor_free  = 0;
+    uint16_t entry = vga_entry(' ',vga_entry_color(text_color,terminal_color));
 
-  for(size_t y = 0; y<VGA_HEIGHT; y++)
-  {
-    
-    for(size_t x = 0; x<VGA_WIDTH; x++)
+    for(size_t r = 0; r<VGA_HEIGHT; r++)
     {
-      const size_t indx = y*VGA_WIDTH + x;
-      terminal_buffer[indx] = vga_entry(' ',vga_entry_color(text_color,terminal_color));
+        for(size_t c = 0; c<VGA_WIDTH; c++)
+        {
+            const size_t pos = r*VGA_WIDTH + c;
+            buffer[pos] = entry;
+        }
     }
-  
-  }
-  
-}
-
-void clear_screen()
-{
-  cur_row = 0;
-  cur_column = 0;
-
-  for(size_t y = 0; y<VGA_HEIGHT; y++)
-  {
-    for(size_t x = 0; x<VGA_WIDTH; x++)
-    {
-      const size_t indx = y*VGA_WIDTH + x;
-      terminal_buffer[indx] = vga_entry(' ',vga_entry_color(text_color,terminal_color));
-    }
-  }
-  update_hardware_cursor();
 }
 
 
-void update_text_shell(uint8_t mode)
+void WRITE(const char* str,enum vga_color color, ...)
 {
-  if(mode==1)
-  {
-    buffer_len--;
-    
-    buffer_pos--;
-    terminal_buffer[buffer_pos] = vga_entry(' ')
-  }
-}
-/*
-%c - char(1 byte)
-%d - int(4 byte)
-%hd - short(2 byte)
-%hu - Ushort(2 byte)
-%hh - char sized(1 byte)
-*/
-
-void write_to_terminal(const char* str,enum vga_color color, ...)
-{
+  //when printing text must always set cursor_write to cursor_free!
+  cursor_write = cursor_free;
   text_color = color;
   va_list args;
   va_start(args,color);
@@ -192,7 +110,7 @@ void write_to_terminal(const char* str,enum vga_color color, ...)
           case '%': state = STATE_LENGTH;
                     break;
 
-          default: putc(*str);
+          default: putc(*str, color);
                     break;
         }
 
@@ -246,27 +164,27 @@ void write_to_terminal(const char* str,enum vga_color color, ...)
         switch(*str)
         {
           case 'c': char c = (char)va_arg(args,int); //automatic promotion of char to int at runtime by C when passed as variadic function!
-                    putc(c);
+                    putc(c, color);
                     break;
 
           case 's': char* s = (char *)va_arg(args,char *);
-                    puts(s); //when I pass a string as a parameter,C automatically addsa a '\0'
+                    puts(s, color); //when I pass a string as a parameter,C automatically addsa a '\0'
                     break;
 
-          case '%': putc('%');
+          case '%': putc('%', color);
                     break;
 
           case 'd':
           case 'i': 
                     radix = 10;
                     sign  = true;
-                    print_num(&args,length,sign,radix);
+                    print_num(&args,length,sign,radix,color);
 
                     break;
 
           case 'u': radix = 10;
                     sign  = false;
-                    print_num(&args,length,sign,radix);
+                    print_num(&args,length,sign,radix,color);
 
                     break;
           
@@ -274,13 +192,13 @@ void write_to_terminal(const char* str,enum vga_color color, ...)
           case 'x':
           case 'X': radix = 16;
                     sign  = false;
-                    print_num(&args,length,sign,radix);
+                    print_num(&args,length,sign,radix,color);
 
                     break;
         
           case 'o': radix = 8;
                     sign = false;
-                    print_num(&args,length,sign,radix);
+                    print_num(&args,length,sign,radix,color);
                     break;
           default : break; //ignore invalid specifiers
 
@@ -304,12 +222,10 @@ void write_to_terminal(const char* str,enum vga_color color, ...)
   va_end(args);
 }
 
-const char hex_chars[] = "0123456789ABCDEF";
 
-//sign here represents weather its unsigned or not, not weather its negative or positive
-void print_num(va_list* args,uint8_t len,bool sign, uint8_t radix)
+void print_num(va_list* args,uint8_t len,bool sign, uint8_t radix, enum vga_color color)
 {
-  char buffer[32];
+  char number[32];
   uint64_t num = 0;
   int num_sign = 1;
   int pos = 0;
@@ -349,14 +265,13 @@ void print_num(va_list* args,uint8_t len,bool sign, uint8_t radix)
   {
     uint32_t rem = num%radix;
     num/=radix;
-    buffer[pos++] = hex_chars[rem];
+    number[pos++] = hex_chars[rem];
 
 
   } while(num > 0); //do to ensure that if number is 0 it also gets printed
 
-  if(sign && num_sign==-1) buffer[pos++]='-';
+  if(sign && num_sign==-1) number[pos++]='-';
 
-  while(--pos>=0) putc(buffer[pos]);
+  while(--pos>=0) putc(number[pos], color);
 
 }
-//umoddi3

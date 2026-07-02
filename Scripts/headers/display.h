@@ -8,7 +8,8 @@
 
 #define VGA_WIDTH   80
 #define VGA_HEIGHT  25
-#define VGA_MEMORY  0xB8000 
+#define LIMIT VGA_WIDTH*VGA_HEIGHT
+#define VGA_MEMORY  0xB8000
 
 #define VGA_CTRL_REGISTER 0x3D4
 #define VGA_DATA_REGISTER 0x3D5
@@ -27,10 +28,12 @@
 #define LEN_L   3 //32-bit long 
 #define LEN_LL  4 //64-bit long long
 
-extern size_t cur_row;
-extern size_t cur_column;
+extern size_t cursor_write;
+extern size_t cursor_free;
 extern uint8_t terminal_color;
 extern uint8_t text_color;
+extern uint16_t buffer[VGA_HEIGHT*VGA_WIDTH];
+
 
 enum vga_color {
 	BLACK = 0,
@@ -53,20 +56,14 @@ enum vga_color {
 };
 
 
-
-
-void new_line();
-void putc(const char c);
-void puts(const char* s);
-void print_num(va_list* args,uint8_t len,bool sign,uint8_t radix);
+void putc(const char c,enum vga_color color);
+void puts(const char* s,enum vga_color color);
+void print_num(va_list* args,uint8_t len,bool sign,uint8_t radix,enum vga_color color);
 
 void move_cursor_left();
 void move_cursor_right();
 
-void update_text_shell(uint8_t mode);
-
-void scroll();
-void terminal_initialize(void);
-void write_to_terminal(const char* str,enum vga_color color, ...);
-void updae_cursor();
-void clear_screen();
+void UPDATE_SCREEN();
+void SCROLL();
+void CLEAR_SCREEN(void);
+void WRITE(const char* str,enum vga_color color, ...);

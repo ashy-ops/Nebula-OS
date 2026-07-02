@@ -4,7 +4,7 @@
 #include "display.h"
 #include "bitmap.h"
 #include "debug.h"
-#include "keyboard.h"
+#include "handler_init.h"
 
 #define ENTRY_COUNT 0x90000
 #define MEMORMY_MAP 0x90010
@@ -34,11 +34,12 @@ typedef struct
 
 void kernel_main()
 {
-  
 
-  terminal_initialize();
-  pic_remap();
   idt_initialize(); 
+  pic_remap();  
+  INIT_HANDLERS();
+  CLEAR_SCREEN();
+
 
   memory_region_t b = {0,0};
   uint8_t count = *(uint8_t*)ENTRY_COUNT;
@@ -85,7 +86,6 @@ void kernel_main()
   }
   else write_to_terminal("Allocation Failed!",WHITE);
 */
-  initialize_keyboard();
   while(1)
   {
     

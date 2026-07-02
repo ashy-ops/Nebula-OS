@@ -1,6 +1,7 @@
 #include "pic.h"
 
-uint8_t lines_enabled[] = {1};
+uint8_t lines_enabled[] = {0,1};
+//0 is for Timer, 1 is for Keyboard!
 
 
 void pic_remap(void) {
@@ -34,7 +35,7 @@ void pic_remap(void) {
     //Setting all IRQs line 0 to IRQ line 15!
     outb(PIC1_DATA, 0xFF);
     outb(PIC2_DATA, 0xFF);
-    write_to_terminal("PIC INITIALIZED!\n",WHITE);
+    WRITE("PIC INITIALIZED!\n",WHITE);
 
     for(int i=0; i<sizeof(lines_enabled)/sizeof(lines_enabled[0]); i++)
     {
