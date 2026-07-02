@@ -294,21 +294,17 @@ ASMFLAGS = -f elf32
 
 ## Demo
 
-![VIDEO](media/video.gif)
+[![Watch the demo](https://img.youtube.com/vi/4ftPqv-wHsc/0.jpg)](https://www.youtube.com/watch?v=4ftPqv-wHsc)
 
-
+### Screenshots
 
 **Boot Loader**
 ![BOOT](media/boot.png)
 
-
-
-**BOOT SCREEN**
+**Boot Screen**
 ![SCREEN](media/terminal.png)
 
-
-
-**SHELL INTERFACE**
+**Shell Interface**
 ![SHELL](media/shell.png)
 
 ## Development Status
