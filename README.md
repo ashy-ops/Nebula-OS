@@ -294,17 +294,19 @@ ASMFLAGS = -f elf32
 
 ## Demo
 
-<video width="800" controls>
-  <source src="media/video.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![VIDEO](media/video.gif)
 
-### Screenshots
+
+
 **Boot Loader**
 ![BOOT](media/boot.png)
 
+
+
 **BOOT SCREEN**
 ![SCREEN](media/terminal.png)
+
+
 
 **SHELL INTERFACE**
 ![SHELL](media/shell.png)
